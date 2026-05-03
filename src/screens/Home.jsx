@@ -1,92 +1,99 @@
 import React, { useState } from "react";
-import { ScrollView, View, StyleSheet, Text, ImageBackground, TouchableOpacity } from "react-native";
+import { ScrollView, View, StyleSheet, Text, TouchableOpacity, Image } from "react-native";
 import { colors } from "../../assets/theme";
-import { Timer, Flame, Play } from "lucide-react-native";
+import { ArrowLeft, CheckCircle2 } from "lucide-react-native";
 import HeaderDashboard from "../components/HeaderDashboard";
 import WorkoutCard from "../components/WorkoutCard";
+import { workoutData } from "../data/workoutData";
 
-export default function Home() {
-  const [activeCategory, setActiveCategory] = useState("Cardio");
-  const categories = ["Cardio", "Strength", "Yoga", "Pilates"];
+
+export default function Home({ navigate }) {
+  const [activeCategory, setActiveCategory] = useState("Semua"); // Default ke SEMUA
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+
+  const categories = ["Semua", "Cardio", "Strength", "Yoga", "Pilates"];
+
+  // Logika Filter: Jika "Semua", tampilkan semua. Jika tidak, samakan kategori
+  const filteredWorkouts = workoutData.filter((item) => 
+    activeCategory === "Semua" ? true : item.category === activeCategory
+  );
+
+  if (selectedWorkout) {
+    return (
+      <View style={styles.detailContainer}>
+        {/* HEADER DENGAN TOMBOL KEMBALI */}
+        <View style={styles.detailHeader}>
+          {/* Saat tombol ini diklik, state selectedWorkout diubah jadi null agar kembali ke HOME */}
+          <TouchableOpacity onPress={() => setSelectedWorkout(null)} activeOpacity={0.7}>
+            <ArrowLeft color={colors.black()} size={24} />
+          </TouchableOpacity>
+          
+          <Text style={styles.detailHeaderText}>Detail Latihan</Text>
+          
+          {/* View kosong ini agar teks "Detail Latihan" tetap berada di tengah secara presisi */}
+          <View style={{ width: 24 }} /> 
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+          <Image source={{ uri: selectedWorkout.image }} style={styles.detailImage} />
+          
+          <View style={{ padding: 24 }}>
+            <Text style={styles.detailTitle}>{selectedWorkout.title}</Text>
+            <Text style={styles.detailCategory}>{selectedWorkout.category} • {selectedWorkout.duration}</Text>
+            
+            <View style={styles.divider} />
+            
+            <Text style={styles.descTitle}>Tips Pro Fitrack:</Text>
+            
+            {/* LOGIKA DINAMIS: Menampilkan tips sesuai item yang diklik */}
+            {selectedWorkout.tips && selectedWorkout.tips.map((item, index) => (
+              <View key={index} style={styles.tipItem}>
+                <CheckCircle2 color={colors.blue()} size={18} />
+                <Text style={styles.tipText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+        
+        {/* Tombol Mulai Latihan */}
+        <TouchableOpacity style={styles.footerButton}>
+          <Text style={styles.footerButtonText}>Mulai Latihan Sekarang</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
-    // Gunakan contentContainerStyle agar padding bawah berfungsi
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-      <HeaderDashboard />
-
-      {/* Hero Section */}
-      <View style={styles.heroSection}>
-        <ImageBackground
-          style={styles.heroImage}
-          resizeMode="cover"
-          imageStyle={{ borderRadius: 24 }}
-          source={{ uri: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800" }}
-        >
-          <View style={styles.heroOverlay}>
-            <View>
-              <Text style={styles.badgeText}> 🔥 Target Hari Ini</Text>
-              <Text style={styles.heroTitle}>Full Body HIIT Workout</Text>
-              <View style={styles.heroStats}>
-                <Timer color={colors.white()} size={16} />
-                <Text style={styles.heroStatText}>45 Menit</Text>
-                <Flame color={colors.white()} size={16} style={{ marginLeft: 12 }} />
-                <Text style={styles.heroStatText}>500 Kkal</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.playButton}>
-              <Play fill={colors.blue()} color={colors.blue()} size={22} />
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
-      </View>
-
-      {/* Bagian Kategori */}
-      <View style={styles.categoryContainer}>
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: colors.white() }}>
+      {/* Teruskan fungsi navigasi ke HeaderDashboard */}
+      <HeaderDashboard navigate={navigate} />
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Pilih Kategori</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 24 }}>
-          {categories.map((item, index) => (
-            <TouchableOpacity 
-              key={index}
-              style={[styles.categoryBtn, activeCategory === item && { backgroundColor: colors.blue() }]} 
-              onPress={() => setActiveCategory(item)}
-            >
-              <Text style={[styles.categoryBtnText, activeCategory === item && { color: colors.white() }]}>
-                {item}
-              </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}>
+          {categories.map((item) => (
+            <TouchableOpacity key={item} onPress={() => setActiveCategory(item)}
+              style={[styles.catBtn, activeCategory === item && { backgroundColor: colors.blue() }]}>
+              <Text style={[styles.catText, activeCategory === item && { color: colors.white() }]}>{item}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
-
-      {/* INI BAGIAN REKOMENDASI KELAS YANG HARUS DITAMBAHKAN */}
-      <View style={styles.verticalListContainer}>
+      <View style={styles.section}>
         <View style={styles.listHeader}>
-          <Text style={styles.sectionTitle}>Rekomendasi Kelas</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAllText}>Lihat Semua</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Rekomendasi ({filteredWorkouts.length})</Text>
+          <Text style={styles.seeAll}>Lihat Semua</Text>
         </View>
-
-        <View style={styles.cardList}>
-          {/* Pastikan memanggil WorkoutCard dan mengisi props-nya */}
-          <WorkoutCard 
-            image="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500"
-            category="Kekuatan"
-            title="Angkat Beban Pemula"
-            duration="30 Menit"
-          />
-          <WorkoutCard 
-            image="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500"
-            category="Yoga"
-            title="Yoga Pagi Menenangkan"
-            duration="20 Menit"
-          />
-          <WorkoutCard 
-            image="https://images.unsplash.com/photo-1518611012118-29606d53012f?w=500"
-            category="Cardio"
-            title="HIIT Home Workout"
-            duration="15 Menit"
-          />
+        <View style={{ paddingHorizontal: 24 }}>
+          {filteredWorkouts.map((workout) => (
+            <WorkoutCard 
+              key={workout.id}
+              image={workout.image}
+              category={workout.category}
+              title={workout.title}
+              duration={workout.duration}
+              onPress={() => setSelectedWorkout(workout)}
+            />
+          ))}
         </View>
       </View>
     </ScrollView>
@@ -94,23 +101,66 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  scrollContent: { paddingBottom: 40 },
-  heroSection: { paddingHorizontal: 24, marginBottom: 30 },
-  heroImage: { width: "100%", height: 200, borderRadius: 24 },
-  heroOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 24, padding: 24, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-end' },
-  badgeText: { color: colors.white(), fontFamily: 'Poppins-SemiBold', backgroundColor: 'rgba(255, 255, 255, 0.25)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, fontSize: 12, marginBottom: 12, overflow: 'hidden' },
-  heroTitle: { color: colors.white(), fontFamily: 'Poppins-ExtraBold', fontSize: 24, marginBottom: 10, width: 200, lineHeight: 30 },
-  heroStats: { flexDirection: 'row', alignItems: 'center' },
-  heroStatText: { color: colors.white(), fontFamily: 'Poppins-Medium', fontSize: 12, marginLeft: 6 },
-  playButton: { backgroundColor: colors.white(), width: 54, height: 54, borderRadius: 27, justifyContent: 'center', alignItems: 'center' },
-  categoryContainer: { marginBottom: 30 },
-  sectionTitle: { fontFamily: 'Poppins-Bold', fontSize: 18, color: colors.black(), paddingHorizontal: 24, marginBottom: 16 },
-  categoryBtn: { paddingHorizontal: 22, paddingVertical: 12, borderRadius: 30, backgroundColor: colors.grey(0.08) },
-  categoryBtnText: { fontFamily: 'Poppins-Medium', fontSize: 14, color: colors.grey() },
-  
-  // Style untuk List Rekomendasi
-  verticalListContainer: { marginTop: 5 },
+  section: { marginBottom: 25 },
+  sectionTitle: { fontFamily: 'Poppins-Bold', fontSize: 18, paddingHorizontal: 24, marginBottom: 15 },
+  catBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 25, backgroundColor: colors.grey(0.08) },
+  catText: { fontFamily: 'Poppins-Medium', color: colors.grey() },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 24 },
-  seeAllText: { fontFamily: 'Poppins-SemiBold', fontSize: 14, color: colors.blue(),paddingBottom: 18 },
-  cardList: { paddingHorizontal: 20, marginTop: 16, gap: 16 }
+  seeAll: { color: colors.blue(), fontFamily: 'Poppins-SemiBold', fontSize: 14 },
+  detailContainer: { 
+    flex: 1, // Sangat penting agar elemen muncul[cite: 2]
+    backgroundColor: colors.white() 
+  },
+  detailHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    height: 60, 
+    borderBottomWidth: 1, 
+    borderBottomColor: colors.grey(0.1) 
+  },
+  detailHeaderText: { fontFamily: 'Poppins-Bold', fontSize: 18 },
+  detailImage: { width: '100%', height: 250, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  detailTitle: { fontFamily: 'Poppins-Bold', fontSize: 24, color: colors.black() },
+  detailCategory: { fontFamily: 'Poppins-SemiBold', fontSize: 16, color: colors.blue(), marginBottom: 20 },
+  divider: { height: 1, backgroundColor: colors.grey(0.1), marginBottom: 20 },
+  descTitle: { fontFamily: 'Poppins-Bold', fontSize: 18, color: colors.black(), marginBottom: 10 },
+  
+  // Style untuk Tips Latihan
+  tipItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 10, 
+    marginBottom: 15 
+  },
+  tipText: { 
+    fontFamily: 'Poppins-Medium', 
+    fontSize: 14, 
+    color: colors.black(),
+    flex: 1 // Agar teks panjang bisa turun ke bawah[cite: 2]
+  },
+
+  // Style untuk Tombol Footer
+  footerButton: { 
+    backgroundColor: colors.blue(), 
+    margin: 24, 
+    paddingVertical: 16, 
+    borderRadius: 16, 
+    alignItems: 'center',
+    // Memberikan shadow agar terlihat melayang[cite: 2]
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+  },
+  footerButtonText: { 
+    color: colors.white(), 
+    fontFamily: 'Poppins-Bold', 
+    fontSize: 16 
+  },
+  divider: { height: 1, backgroundColor: colors.grey(0.1), marginBottom: 20 },
+  descTitle: { fontFamily: 'Poppins-Bold', fontSize: 18, marginBottom: 10 },
+  tipItem: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  tipText: { fontFamily: 'Poppins-Medium', fontSize: 14 }
 });

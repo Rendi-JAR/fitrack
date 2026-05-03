@@ -1,59 +1,50 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
-import { colors } from "../../assets/theme"; // Pastikan path ../ nya dua kali karena masuk folder screens
+import { colors } from "../../assets/theme";
 import { User, Search, Activity } from "lucide-react-native";
 
-export default function HeaderDashboard() {
+// Terima { navigate } dari Home
+export default function HeaderDashboard({ navigate }) {
   return (
     <View style={styles.headerContainer}>
-      {/* Logo Row */}
       <View style={styles.logoRow}>
-        <Activity color={colors.blue()} size={22} />
+        <Activity color={colors.blue()} size={20} />
         <Text style={styles.logoText}>Fitrack</Text>
       </View>
-
-      {/* Greeting & Profile */}
+      
       <View style={styles.greetingRow}>
-        <View style={styles.greetingTextContainer}>
-          <Text style={styles.greetingTitle}>Halo, Pejuang Fit!</Text>
-        </View>
-        <TouchableOpacity style={styles.profileBtnPlain} activeOpacity={0.7}>
-          <User color={colors.grey()} size={25} />
+        <Text style={styles.greetingTitle}>Halo, Pejuang Fit!</Text>
+        {/* TOMBOL PROFILE: Klik ini akan buka layar Profile */}
+        <TouchableOpacity style={styles.profileBtn} onPress={() => navigate('Profile')}>
+          <User color={colors.grey()} size={26} />
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchBar}>
-        <Search color={colors.grey()} size={22} />
-        <TextInput 
-          placeholder="Cari program latihan..." 
-          style={styles.searchInput}
-          placeholderTextColor={colors.grey(0.6)}
-        />
-      </View>
+      {/* TOMBOL SEARCH: Klik ini akan buka layar Discover */}
+      <TouchableOpacity 
+        style={styles.searchBar} 
+        activeOpacity={0.8} 
+        onPress={() => navigate('Discover')}
+      >
+        <Search color={colors.grey(0.5)} size={18} />
+        <View pointerEvents="none" style={{ flex: 1 }}>
+          <TextInput 
+            placeholder="Cari program latihan..." 
+            style={styles.searchInput} 
+            editable={false} // Supaya keyboard tidak muncul, karena kita mau pindah halaman
+          />
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    backgroundColor: colors.white(),
-    paddingHorizontal: 22,
-    paddingTop: 12,
-    paddingBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 8,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    marginBottom: 25,
-  },
-  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-  logoText: { fontFamily: 'Poppins-ExtraBold', fontSize: 18, color: colors.blue() },
-  greetingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
-  greetingTitle: { fontFamily: 'Poppins-Bold', fontSize: 21, color: colors.black() },
-  profileBtnPlain: { width: 45, height: 45, borderRadius: 25, backgroundColor: colors.grey(0.1), justifyContent: 'center', alignItems: 'center' },
-  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.grey(0.08), borderRadius: 25, paddingHorizontal: 15, paddingVertical: 6 },
-  searchInput: { flex: 1, marginLeft: 10, fontFamily: 'Poppins-Medium', fontSize: 14, color: colors.black() },
+  headerContainer: { backgroundColor: colors.white(), paddingHorizontal: 24, paddingBottom: 25, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, elevation: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, marginBottom: 20 },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 15 },
+  logoText: { fontFamily: 'Poppins-ExtraBold', fontSize: 16, color: colors.blue() },
+  greetingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  greetingTitle: { fontFamily: 'Poppins-Bold', fontSize: 22 },
+  profileBtn: { width: 45, height: 45, borderRadius: 23, backgroundColor: colors.grey(0.1), justifyContent: 'center', alignItems: 'center' },
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.grey(0.05), borderRadius: 15, paddingHorizontal: 15, height: 50 },
+  searchInput: { flex: 1, marginLeft: 10, fontFamily: 'Poppins-Medium' }
 });
