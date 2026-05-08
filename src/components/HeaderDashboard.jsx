@@ -3,7 +3,7 @@ import { colors } from "../../assets/theme";
 import { User, Search, Activity } from "lucide-react-native";
 
 // Terima { navigate } dari Home
-export default function HeaderDashboard({ navigate }) {
+export default function HeaderDashboard({ navigation }) {
   return (
     <View style={styles.headerContainer}>
       <View style={styles.logoRow}>
@@ -14,17 +14,13 @@ export default function HeaderDashboard({ navigate }) {
       <View style={styles.greetingRow}>
         <Text style={styles.greetingTitle}>Halo, Pejuang Fit!</Text>
         {/* TOMBOL PROFILE: Klik ini akan buka layar Profile */}
-        <TouchableOpacity style={styles.profileBtn} onPress={() => navigate('Profile')}>
+        <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('Profile')}>
           <User color={colors.grey()} size={26} />
         </TouchableOpacity>
       </View>
 
       {/* TOMBOL SEARCH: Klik ini akan buka layar Discover */}
-      <TouchableOpacity 
-        style={styles.searchBar} 
-        activeOpacity={0.8} 
-        onPress={() => navigate('Discover')}
-      >
+      <TouchableOpacity style={styles.searchBar} activeOpacity={0.8} onPress={() => navigation.navigate('Discover')}>
         <Search color={colors.grey(0.5)} size={18} />
         <View pointerEvents="none" style={{ flex: 1 }}>
           <TextInput 

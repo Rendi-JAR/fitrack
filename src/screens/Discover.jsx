@@ -1,71 +1,91 @@
-import React from "react";
+import React, { useState } from "react"; // Tambahkan useState
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity } from "react-native";
-import { Search } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context"; // Tambahkan SafeAreaView
+import { Search, ArrowLeft } from "lucide-react-native";
 import { colors } from "../../assets/theme";
 import WorkoutCard from "../components/WorkoutCard";
 import { workoutData } from "../data/workoutData";
-import { ArrowLeft} from "lucide-react-native";
 
-// Data tag pencarian populer
 const popularTags = ["Bakar Lemak", "Otot Perut", "Yoga Santai", "Kardio", "Pemula"];
 
-export default function Discover({navigate}) {
+export default function Discover({ navigation }) {
+  // STATE PENCARIAN
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // LOGIKA FILTER PENCARIAN (Mencari berdasarkan judul atau kategori)
+  const searchedWorkouts = workoutData.filter((item) => 
+    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <View style={styles.container}>
-      {/* Header & Search Bar */}
+    // BUNGKUS DENGAN SAFEAREAVIEW AGAR RAPI
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigate('Home')} style={{ marginBottom: 15 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 15 }}>
           <ArrowLeft color={colors.black()} size={24} />
         </TouchableOpacity>
+        
         <Text style={styles.headerTitle}>Jelajah</Text>
+        
         <View style={styles.searchBar}>
           <Search size={18} color={colors.grey(0.5)} />
           <TextInput 
             placeholder="Cari program latihan..." 
             style={styles.searchInput} 
             placeholderTextColor={colors.grey(0.5)}
+            // HUBUNGKAN TEXTINPUT DENGAN STATE
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
           />
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Tag Pencarian Populer[cite: 1] */}
+        {/* Tag Populer (Bisa di-klik untuk mengisi kolom pencarian otomatis) */}
         <View style={styles.tagsSection}>
           <Text style={styles.sectionTitle}>Pencarian Populer</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}>
             {popularTags.map((tag, index) => (
-              <TouchableOpacity key={index} style={styles.tagButton}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.tagButton}
+                onPress={() => setSearchQuery(tag)} // Klik tag langsung mengisi pencarian
+              >
                 <Text style={styles.tagText}>{tag}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
-        {/* Daftar Semua Kelas[cite: 1] */}
         <View style={styles.listSection}>
-          <Text style={styles.sectionTitle}>Semua Kelas ({workoutData.length})</Text>
+          {/* Tampilkan jumlah hasil pencarian */}
+          <Text style={styles.sectionTitle}>
+            {searchQuery === "" ? `Semua Kelas (${workoutData.length})` : `Hasil Pencarian (${searchedWorkouts.length})`}
+          </Text>
           <View style={{ paddingHorizontal: 24 }}>
-            {workoutData.map((workout) => (
+            {/* TAMPILKAN DATA YANG SUDAH DI-FILTER */}
+            {searchedWorkouts.map((workout) => (
               <WorkoutCard 
                 key={workout.id}
                 image={workout.image}
                 category={workout.category}
                 title={workout.title}
                 duration={workout.duration}
-                // Karena ini screen statis untuk tugas, kita beri console.log saja
-                onPress={() => console.log(`Masuk ke detail: ${workout.title}`)}
+                // Bisa diklik masuk ke detail juga
+                onPress={() => navigation.navigate('DetailWorkout', { workout: workout })}
               />
             ))}
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white() },
-  header: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 15 },
+  header: { paddingHorizontal: 24, paddingTop: 10, paddingBottom: 15 },
   headerTitle: { fontFamily: 'Poppins-Bold', fontSize: 24, color: colors.black(), marginBottom: 15 },
   searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.grey(0.05), borderRadius: 15, paddingHorizontal: 15, height: 50 },
   searchInput: { flex: 1, marginLeft: 10, fontFamily: 'Poppins-Medium', fontSize: 14, color: colors.black() },
